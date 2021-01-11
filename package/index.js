@@ -1,12 +1,12 @@
 const axios = require('axios')
 
-class DataBase {
+export class DataBase {
     constructor(url){
         this.url = url
     }
 }
 
-class dbRequest {
+export class dbRequest {
     constructor (requestObject,path,callback){
         console.log(requestObject)
         this.db = requestObject.url
@@ -14,7 +14,7 @@ class dbRequest {
         this.callback = callback
     }
 
-    getOnce() { 
+    async getOnce() { 
         axios
         .post(this.db+"/get-once", {
             path: this.path
@@ -27,7 +27,7 @@ class dbRequest {
         })
     }
 
-    writeFile(data) {
+    async writeFile(data) {
         axios
         .post(this.db+"/write-file", {
             path: this.path,

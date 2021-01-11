@@ -1,6 +1,6 @@
 {
   "name": "jasonbase",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -9,6 +9,10 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SauceArgente/jasonbase.git"
+  },
   "dependencies": {
     "axios": "^0.21.1"
   }
