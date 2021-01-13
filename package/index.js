@@ -1,22 +1,27 @@
 const axios = require('axios')
+const WebSocket = require('ws');
 
-export class DataBase {
-    constructor(url){
-        this.url = url
+let expressPort = 1009
+let  wsPort = 1010
+
+class db {
+    constructor(params){
+        this.url = params.url
     }
 }
 
-export class dbRequest {
-    constructor (requestObject,path,callback){
-        console.log(requestObject)
+class dbRequest {
+    constructor (requestObject){
         this.db = requestObject.url
-        this.path = path
-        this.callback = callback
+        this.expressURL = "http://"+this.db+":1009"
+        this.wsURL = "ws://"+this.db+":1010"
+        this.path = ""
+        this.callback = () => {}
     }
 
-    async getOnce() { 
+    async MgetOnce() { 
         axios
-        .post(this.db+"/get-once", {
+        .post(this.expressURL+"/get-once", {
             path: this.path
         })
         .then(res => {
@@ -27,9 +32,9 @@ export class dbRequest {
         })
     }
 
-    async writeFile(data) {
+    async MwriteFile(data) {
         axios
-        .post(this.db+"/write-file", {
+        .post(this.expressURL+"/write-file", {
             path: this.path,
             data: data
         })
@@ -43,26 +48,64 @@ export class dbRequest {
         })
 
     }
+
+    async MgetRealTime() {
+        const ws = new WebSocket(this.wsURL);
+        let parent = this
+
+        ws.on('open', function open() {
+            ws.send(JSON.stringify({path:parent.path}))
+          });
+          
+          ws.on('message', function incoming(data) {
+            parent.callback(JSON.parse(data))
+          });
+    }
 }
 
-Object.prototype.collection = function(collection) {
-    let obj = {url:this.url,request:this.request}
-    if(this.request == undefined){this.request = ""}
-    this.request += "/"+collection
-    return this
+db.prototype.collection = function(collection) {
+    let obj = new dbRequest(this)
+    if(this.request == undefined){obj.path = ""}
+    obj.path += "/"+collection
+    return obj
 }
-
-Object.prototype.doc = function(doc) {
-    let obj = {url:this.url,request:this.request}
-    if(obj.request == undefined){obj.request = ""}
-    obj.request += "/"+doc+".json"
+db.prototype.doc = function(doc) {
+    let obj = new dbRequest(this)
+    if(this.request == undefined){obj.path = ""}
+    obj.path += "/"+doc+".json"
     return obj
 }
 
-Object.prototype.getOnce = function(callback) {
-    new dbRequest(db,this.request,callback).getOnce()
+dbRequest.prototype.collection = function(collection) {
+    this.path += "/"+collection
+    return this
 }
 
-Object.prototype.writeFile = function(data,callback) {
-    new dbRequest(this,this.request,callback).writeFile(data)
+dbRequest.prototype.doc = function(doc) {
+    this.path += "/"+doc+".json"
+    return obj
+}
+
+dbRequest.prototype.getOnce = function(callback) {
+    this.callback = callback
+    this.MgetOnce()
+}
+
+dbRequest.prototype.getRealTime = function(callback) {
+    this.callback = callback
+    this.MgetRealTime()
+}
+
+dbRequest.prototype.writeFile = function(data,callback) {
+    if(callback == undefined){
+        this.callback = () => {}
+    }else{
+        this.callback = callback
+    }
+    this.MwriteFile(data)
+}
+
+module.exports = {
+    db : db,
+    dbRequest : dbRequest
 }
