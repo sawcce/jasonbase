@@ -1,51 +1,72 @@
-const express = require('express')
-const app = express()
-const bodyParser = require('body-parser');
-const port = 1009
+const express = require("express");
+const app = express();
+const bodyParser = require("body-parser");
+const port = 1009;
 const fs = require("fs");
-const ws = require("ws")
-const server = new ws.Server({port:1010})
-const { cwd } = require('process');
-const jetpack = require('fs-jetpack');
+const ws = require("ws");
+const server = new ws.Server({ port: 1010 });
+const { cwd } = require("process");
+const jetpack = require("fs-jetpack");
+const query = require("./modules/query");
 
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json())
+app.use(bodyParser.json());
 
-app.post('/get-once', (req, res) => {
-    let path = cwd()+"/db"+req.body.path
-    fs.readFile(path, 'utf8',(err, data) =>{
-        res.json(data)
-    })
-})
+app.post("/get-once", (req, res) => {
+  let path = cwd() + "/db" + req.body.path;
+  let body = req.body;
+  switch (body.type) {
+    case "document":
+      fs.readFile(path, "utf8", (err, data) => {
+        res.json(data);
+      });
+      break;
+    case "query":
+      query.executeQuery({ query: body.query, path: path }).then((data) => {
+        res.json(JSON.stringify(data));
+      });
+      break;
+  }
+});
 
-app.post('/write-file', (req, res) => {
-    let path = cwd()+"/db"+req.body.path
-    jetpack.writeAsync(path, JSON.stringify(req.body.data))
-    .then(() =>{
-        res.json(JSON.stringify(req.body.data))
-    })
-})
+app.post("/write-file", (req, res) => {
+  let path = cwd() + "/db" + req.body.path;
+  jetpack.writeAsync(path, JSON.stringify(req.body.data)).then(() => {
+    res.json(JSON.stringify(req.body.data));
+  });
+});
 
-server.on('connection', socket => {
-    socket.on('message', function incoming(message) {
-        console.log('Asked to watch file : ', message);
-        let path = cwd()+"/db"+JSON.parse(message).path
-        jetpack.readAsync(path)
-        .then((data) => {
-            console.log(data);
-            socket.send(JSON.stringify({previousMT:undefined,currentMT:undefined,data:data}))
-            
-            fs.watchFile(path, (curr, prev) => { 
-                jetpack.readAsync(path)
-                .then((data) => {
-                    console.log(data);
-                    socket.send(JSON.stringify({previousMT:prev.mtime,currentMT:curr.mtime,data:data}))
-                });
-            }); 
+server.on("connection", (socket) => {
+  socket.on("message", function incoming(message) {
+    console.log("Asked to watch file : ", message);
+    let path = cwd() + "/db" + JSON.parse(message).path;
+    jetpack.readAsync(path).then((data) => {
+      console.log(data);
+      socket.send(
+        JSON.stringify({
+          previousMT: undefined,
+          currentMT: undefined,
+          data: data,
+        })
+      );
+
+      fs.watchFile(path, (curr, prev) => {
+        console.log("Changed");
+        jetpack.readAsync(path).then((data) => {
+          console.log(data);
+          socket.send(
+            JSON.stringify({
+              previousMT: prev.mtime,
+              currentMT: curr.mtime,
+              data: data,
+            })
+          );
         });
-      }); 
+      });
     });
+  });
+});
 
 app.listen(port, () => {
-  console.log(`Example app listening at http://localhost:${port}`)
-})
+  console.log(`Server app listening at http://localhost:${port}`);
+});
