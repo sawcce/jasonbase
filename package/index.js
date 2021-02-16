@@ -5,14 +5,16 @@ let expressPort = 1009;
 let wsPort = 1010;
 
 class db {
-  constructor(params) {
-    this.url = params.url;
+  constructor({url,key}) {
+    this.url = url;
+    this.key = key;
   }
 }
 
 class dbRequest {
   constructor(requestObject) {
     this.db = requestObject.url;
+    this.key = requestObject.key;
     this.expressURL = "http://" + this.db + ":1009";
     this.wsURL = "ws://" + this.db + ":1010";
     this.type;
@@ -21,34 +23,40 @@ class dbRequest {
   }
 
   async MgetOnce() {
-    axios
+    return new Promise((resolve,reject)=>{
+      axios
       .post(this.expressURL + "/get-once", {
         path: this.path,
         query: this.query,
         type: this.type,
+        key: this.key,
       })
       .then((res) => {
-        this.callback(JSON.parse(res.data));
+        resolve(JSON.parse(res.data));
       })
       .catch((error) => {
-        console.error(error);
+        reject(error.response.data);
       });
+    })
   }
 
   async MwriteFile(data) {
+    return new Promise((resolve,reject)=>{
+        
     axios
-      .post(this.expressURL + "/write-file", {
-        path: this.path,
-        data: data,
-      })
-      .then((res) => {
-        if (this.callback != undefined) {
-          this.callback();
-        }
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+    .post(this.expressURL + "/write-file", {
+      path: this.path,
+      data: data,
+      key: this.key,
+    })
+    
+    .then((res) => {
+      resolve(JSON.parse(res.data));
+    })
+    .catch((error) => {
+      reject(error.response.data);
+    });
+    })
   }
 
   async MgetRealTime() {
@@ -97,8 +105,8 @@ dbRequest.prototype.doc = function (doc) {
 };
 
 dbRequest.prototype.getOnce = function (callback) {
-  this.callback = callback;
-  this.MgetOnce();
+  //this.callback = callback;
+  return this.MgetOnce();
 };
 
 dbRequest.prototype.query = function (query) {
@@ -118,7 +126,7 @@ dbRequest.prototype.writeFile = function (data, callback) {
   } else {
     this.callback = callback;
   }
-  this.MwriteFile(data);
+  return this.MwriteFile(data);
 };
 
 module.exports = {

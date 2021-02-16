@@ -7,33 +7,19 @@ const ws = require("ws");
 const server = new ws.Server({ port: 1010 });
 const { cwd } = require("process");
 const jetpack = require("fs-jetpack");
-const query = require("./modules/query");
+const jason = require("./modules/jason-server");
+const { write } = require("fs-jetpack");
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 app.post("/get-once", (req, res) => {
-  let path = cwd() + "/db" + req.body.path;
-  let body = req.body;
-  switch (body.type) {
-    case "document":
-      fs.readFile(path, "utf8", (err, data) => {
-        res.json(data);
-      });
-      break;
-    case "query":
-      query.executeQuery({ query: body.query, path: path }).then((data) => {
-        res.json(JSON.stringify(data));
-      });
-      break;
-  }
+  jason.callHook(req,res,"get")
 });
 
 app.post("/write-file", (req, res) => {
+  jason.callHook(req,res,"write")
   let path = cwd() + "/db" + req.body.path;
-  jetpack.writeAsync(path, JSON.stringify(req.body.data)).then(() => {
-    res.json(JSON.stringify(req.body.data));
-  });
 });
 
 server.on("connection", (socket) => {
@@ -70,3 +56,24 @@ server.on("connection", (socket) => {
 app.listen(port, () => {
   console.log(`Server app listening at http://localhost:${port}`);
 });
+
+jason.addCustomHook("/population",(req)=>{
+  req.switchByType({
+    read(){  
+      req.fetchData().then(data=>{
+      req.json(data)
+      req.validate()
+      }).catch(error=>{
+        req.reject(404)
+      })
+    },
+    write() {
+      if(req.hasPrivilege("admin")){
+        req.write()
+      }else{
+        reject(401)
+      }
+    }
+  })
+
+})

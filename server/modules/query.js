@@ -62,7 +62,7 @@ module.exports = {
 
       switch (call) {
         case "allInstances":
-          jetpack.listAsync(path).then(async (files) => {
+          jetpack.listAsync(path).then((files) => {
             for (let i = 0; i < files.length; i++) {
               let fileName = files[i];
               let rdata = jetpack.read(path + "/" + fileName);
