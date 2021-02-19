@@ -1,14 +1,15 @@
 const codes = require("./http-codes");
 const { cwd } = require("process");
 const query = require("./query");
-const jetpack  = require("fs-jetpack")
 
 class request {
   constructor(req, res, type) {
     this.type = type;
     this.req = req;
     this.res = res;
-    this.path = cwd() + "/db" + req.body.path;
+    if ("path" in req.body) {
+      this.path = cwd() + "/db" + req.body.path;
+    }
     this.body = this.req.body;
   }
 
@@ -20,7 +21,7 @@ class request {
     return this.privileges;
   }
 
-  hasPrivilege(name){
+  hasPrivilege(name) {
     return name in this.privileges;
   }
 
@@ -49,14 +50,14 @@ class request {
     });
   }
 
-  switchByType({write,read}){
-    console.log(this.type)
-    switch(this.type){
+  switchByType({ write, read }) {
+    console.log(this.type);
+    switch (this.type) {
       case "get":
-        read()
+        read();
         break;
       case "write":
-        write()
+        write();
         break;
     }
   }
@@ -80,7 +81,7 @@ class request {
     this.res.status(code);
     let codeS = code.toString();
     console.log(codes[codeS]);
-    this.res.json(JSON.stringify(codes[codeS]));
+    this.res.json(codes[codeS]);
   }
 }
 

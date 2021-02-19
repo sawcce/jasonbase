@@ -1,11 +1,12 @@
 const axios = require("axios");
 const WebSocket = require("ws");
+const { DBrequest } = require("../server/modules/request");
 
 let expressPort = 1009;
 let wsPort = 1010;
 
 class db {
-  constructor({url,key}) {
+  constructor({ url, key }) {
     this.url = url;
     this.key = key;
   }
@@ -22,41 +23,42 @@ class dbRequest {
     this.callback = () => {};
   }
 
+  asy
+
   async MgetOnce() {
-    return new Promise((resolve,reject)=>{
+    return new Promise((resolve, reject) => {
       axios
-      .post(this.expressURL + "/get-once", {
-        path: this.path,
-        query: this.query,
-        type: this.type,
-        key: this.key,
-      })
-      .then((res) => {
-        resolve(JSON.parse(res.data));
-      })
-      .catch((error) => {
-        reject(error.response.data);
-      });
-    })
+        .post(this.expressURL + "/get-once", {
+          path: this.path,
+          query: this.query,
+          type: this.type,
+          key: this.key,
+        })
+        .then((res) => {
+          resolve(JSON.parse(res.data));
+        })
+        .catch((error) => {
+          reject(error.response.data);
+        });
+    });
   }
 
   async MwriteFile(data) {
-    return new Promise((resolve,reject)=>{
-        
-    axios
-    .post(this.expressURL + "/write-file", {
-      path: this.path,
-      data: data,
-      key: this.key,
-    })
-    
-    .then((res) => {
-      resolve(JSON.parse(res.data));
-    })
-    .catch((error) => {
-      reject(error.response.data);
+    return new Promise((resolve, reject) => {
+      axios
+        .post(this.expressURL + "/write-file", {
+          path: this.path,
+          data: data,
+          key: this.key,
+        })
+
+        .then((res) => {
+          resolve(JSON.parse(res.data));
+        })
+        .catch((error) => {
+          reject(error.response.data);
+        });
     });
-    })
   }
 
   async MgetRealTime() {
@@ -69,6 +71,24 @@ class dbRequest {
 
     ws.on("message", function incoming(data) {
       parent.callback(JSON.parse(data));
+    });
+  }
+
+  async MCall(name, params) {
+    return new Promise((resolve, reject) => {
+      axios
+        .post(this.expressURL + "/call", {
+          name: name,
+          params: params,
+          key: this.key,
+        })
+
+        .then((res) => {
+          resolve(JSON.parse(res.data));
+        })
+        .catch((error) => {
+          reject(error.response.data);
+        });
     });
   }
 }
@@ -90,6 +110,11 @@ db.prototype.doc = function (doc) {
   obj.path += "/" + doc + ".json";
   obj.type = "document";
   return obj;
+};
+
+db.prototype.execute = function (name, args) {
+  let obj = new dbRequest(this);
+  return obj.MCall(name, args);
 };
 
 dbRequest.prototype.collection = function (collection) {

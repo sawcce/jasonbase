@@ -1,0 +1,5 @@
+{
+    "name":"default-hooks",
+    "entry":"index.js",
+    "description":"Hooks are an easy way to make your db secure, this extension provides a powerful and native way to do it"
+}

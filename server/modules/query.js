@@ -1,8 +1,8 @@
-const { json } = require("body-parser");
 var jetpack = require("fs-jetpack");
+const shared = require("./shared.js");
 
 module.exports = {
-  executeOperator({ operator, value, operatorVal, data }) {
+  executeOperator({ operator, value, operatorVal, data, params }) {
     switch (operator) {
       case "smaller":
         return data[value] < operatorVal;
@@ -10,9 +10,14 @@ module.exports = {
       case "greater":
         return data[value] > operatorVal;
         break;
-
       case "equals":
         return data[value] == operatorVal;
+        break;
+      case "equalsLarge":
+        var rawData = data[value];
+        rawData = rawData.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, '');
+        var rOpVal = operatorVal.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, '')
+        return rawData == rOpVal;
         break;
     }
   },
@@ -25,13 +30,47 @@ module.exports = {
       var operator = Object.keys(params)[0];
       var operatorVal = Object.values(params);
 
-      var isTrue = this.executeOperator({
-        operator: operator,
-        value: call,
-        operatorVal: operatorVal,
-        data: data,
-      });
-      resolve(isTrue);
+      switch (call) {
+        case "matches":
+          var values = params.values;
+          if(params.type == "large"){
+            for(let i=0;i<values.length;i++){
+              var doesMatch = this.executeOperator({
+                operator:"equalsLarge",
+                operatorVal:params.data[i],
+                data:data,
+                value:params.values[i]
+              })
+              if(doesMatch){
+                resolve(true)
+              }
+            }
+          }else{
+            for(let i=0;i<values.length;i++){
+              var doesMatch = this.executeOperator({
+                operator:"equals",
+                operatorVal:data,
+                data:data,
+                value:params.data[i]
+              })
+              if(doesMatch){
+                resolve(true)
+              }
+            }
+          }
+          resolve(false)
+          break;
+        default:
+          var isTrue = this.executeOperator({
+            operator: operator,
+            params: params,
+            value: call,
+            operatorVal: operatorVal,
+            data: data,
+          });
+          resolve(isTrue);
+          break;
+      }
     });
   },
 
@@ -58,11 +97,35 @@ module.exports = {
     return new Promise((resolve, reject) => {
       let fetchedData = [];
       var call = Object.keys(query)[0];
-      var params = Object.entries(query)[0][1];
+      var params = Object.values(query)[0];
 
       switch (call) {
+        case "sort":
+          this.executeQuery({ query: params.value, path: path }).then(
+            (value) => {
+              console.log(`Sorting array of length : ${value.length}`);
+              switch (params.order) {
+                case "+-":
+                  value.sort((a, b) => {
+                    return b[params.sortBy] - a[params.sortBy];
+                  });
+                  break;
+                case "-+":
+                  value.sort((a, b) => {
+                    return a[params.sortBy] - b[params.sortBy];
+                  });
+                  break;
+              }
+              resolve(value);
+            }
+          );
+          break;
         case "allInstances":
           jetpack.listAsync(path).then((files) => {
+            if (files.length == 0) {
+              resolve([]);
+            }
+
             for (let i = 0; i < files.length; i++) {
               let fileName = files[i];
               let rdata = jetpack.read(path + "/" + fileName);
@@ -82,6 +145,19 @@ module.exports = {
                 }
               });
             }
+          });
+          break;
+
+        default:
+          shared.callCustomFilter({
+            name: call,
+            exists: (method) => {
+              method({ params: params, path: path, resolve: resolve });
+            },
+            notExists: () => {
+              console.log("Call notexists");
+              reject();
+            },
           });
           break;
       }
