@@ -11,6 +11,15 @@ module.exports = {
       notExists();
     }
   },
+  read(path){
+    return new Promise((resolve,reject)=>{
+      jetpack.readAsync(dbPath + path + ".json").then(data=>{
+        resolve(JSON.parse(data))
+      }).catch(e=>{
+        reject(e)
+      })
+    })
+  },
   write(path, data) {
     return new Promise((resolve, reject) => {
       var filePath = dbPath + path;

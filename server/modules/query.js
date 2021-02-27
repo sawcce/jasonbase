@@ -28,7 +28,7 @@ module.exports = {
       var params = Object.entries(query)[0][1];
 
       var operator = Object.keys(params)[0];
-      var operatorVal = Object.values(params);
+      var operatorVal = Object.values(params)[0];
 
       switch (call) {
         case "matches":
@@ -103,7 +103,6 @@ module.exports = {
         case "sort":
           this.executeQuery({ query: params.value, path: path }).then(
             (value) => {
-              console.log(`Sorting array of length : ${value.length}`);
               switch (params.order) {
                 case "+-":
                   value.sort((a, b) => {
@@ -136,6 +135,9 @@ module.exports = {
                 data: data,
               }).then((fData) => {
                 if (fData != "undefined") {
+                  fData.extDATA = {
+                    id: fileName.split(".")[0]
+                  }
                   fetchedData.push(fData);
                 } else {
                 }
@@ -155,7 +157,7 @@ module.exports = {
               method({ params: params, path: path, resolve: resolve });
             },
             notExists: () => {
-              console.log("Call notexists");
+              console.log("Call not exists");
               reject();
             },
           });

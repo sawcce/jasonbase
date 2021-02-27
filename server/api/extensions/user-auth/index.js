@@ -2,6 +2,63 @@ const { cwd } = require("fs-jetpack");
 const bcrypt = require("bcrypt");
 
 module.exports = ({ jason, auth, query, db }) => {
+  jason.addCustomMethod("getUser", (req)=>{
+    var keyID = req.body.key
+    auth.isKeyValid({
+      key:keyID,
+      isValid(key){
+        db.read(`/users/${key.data.userID}`).then(data=>{
+          req.json(data)
+          req.sanitize(["salt","password"])
+          req.validate()
+        }).catch(e=>{
+          req.reject(404)
+        })
+      },
+      isInvalid(){
+        req.reject(404)
+      }
+    })
+  })
+
+  jason.addCustomMethod("login", (req) => {
+    var params = req.body.params;
+
+    var password = params.password;
+    var emaild = params.email;
+
+    var q = {
+      allInstances: {
+        where: {
+          email: {
+            equalsLarge: emaild,
+          },
+        },
+      },
+    };
+
+    query.executeQuery({ query: q, path: cwd() + "/db/users" }).then((data) => {
+      if (data.length > 0) {
+        let user = data[0];
+
+        let ps = `${user.creationDate * user.email.length}${password}${user.email}`;
+
+        bcrypt.hash(ps, user.salt).then((hp) => {
+          if(hp == user.password){
+            let keyID = parseInt(Math.random() * 100 * Date.now());
+
+            auth.createNewKey({name:keyID,data:{userID:user.extDATA.id}})
+            req.after().changeKey(keyID)
+            req.json({message:"Login sucessful"})
+            req.validate()
+          }
+        });
+      } else {
+        reject(404);
+      }
+    });
+  });
+
   jason.addCustomMethod("register", (req) => {
     var params = req.body.params;
 

@@ -30,7 +30,6 @@ app.post("/write-file", (req, res) => {
 });
 
 app.post("/call", (req, res) => {
-  console.log("new call")
   var body = req.body;
   
   auth.isKeyValid({

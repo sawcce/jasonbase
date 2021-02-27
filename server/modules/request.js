@@ -11,6 +11,7 @@ class request {
       this.path = cwd() + "/db" + req.body.path;
     }
     this.body = this.req.body;
+    this.postActions = [];
   }
 
   setPrivileges(data) {
@@ -69,12 +70,15 @@ class request {
   }
 
   json(data) {
-    this.jsonData = JSON.stringify(data);
+    this.jsonData = data;
   }
 
   validate() {
     this.res.status(200);
-    this.res.json(this.jsonData);
+    this.res.json({
+      data: this.jsonData,
+      after: this.postActions,
+    });
   }
 
   reject(code) {
@@ -82,6 +86,26 @@ class request {
     let codeS = code.toString();
     console.log(codes[codeS]);
     this.res.json(codes[codeS]);
+  }
+
+  sanitize(fields) {
+    fields.forEach((field) => {
+      console.log(typeof this.jsonData);
+      this.jsonData[field] = undefined;
+    });
+  }
+
+  after() {
+    let pa = this.postActions;
+    return {
+      changeKey(newKey) {
+        console.log(pa);
+        pa.push({
+          type: "kc",
+          nk: newKey,
+        });
+      },
+    };
   }
 }
 

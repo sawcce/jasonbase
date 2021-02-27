@@ -14,6 +14,7 @@ class db {
 
 class dbRequest {
   constructor(requestObject) {
+    this.refObj = requestObject;
     this.db = requestObject.url;
     this.key = requestObject.key;
     this.expressURL = "http://" + this.db + ":1009";
@@ -23,7 +24,15 @@ class dbRequest {
     this.callback = () => {};
   }
 
-  asy
+  async runActions(actions) {
+    actions.forEach((action) => {
+      switch (action.type) {
+        case "kc":
+          this.refObj.key = action.nk.toString();
+          break;
+      }
+    });
+  }
 
   async MgetOnce() {
     return new Promise((resolve, reject) => {
@@ -84,7 +93,8 @@ class dbRequest {
         })
 
         .then((res) => {
-          resolve(JSON.parse(res.data));
+          this.runActions(res.data.after);
+          resolve(res.data.data);
         })
         .catch((error) => {
           reject(error.response.data);
