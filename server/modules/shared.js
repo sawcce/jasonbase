@@ -1,4 +1,3 @@
-const { dbRequest } = require("../../client-test/node_modules/jasonbase");
 const { DBrequest } = require("./request");
 
 var hooks = {};
