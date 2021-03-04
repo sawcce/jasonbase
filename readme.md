@@ -1,6 +1,6 @@
-# JASON BASE
+# Daniilbase
 
-Jason BASE is an easy to use extremely customizable json based db.
+Daniilbase is an easy to use extremely customizable json based db.
 It allows for complex and powerful queries with a collection of helpers and packages to make rules and authentication.
 
 -- It isn't finished please don't use for production --
@@ -124,7 +124,7 @@ db.path.getRealTime
 
 ## Server
 
-Jason Base is made to be extremely modular and secure.
+Daniilbase is made to be extremely modular and secure.
 
 You can make hook / privileges to restrian the access to you db and even make custom routes.
 
@@ -160,7 +160,7 @@ jason.addCustomHook("/population",(req)=>{
 })
 ```
 
-By default, if you do not set a hook for a path jason abse will reject the request.
+By default, if you do not set a hook for a path Daniilbase will reject the request.
 
 To add privileges you can just go into server > api > auth > your-key.json
 and then 
