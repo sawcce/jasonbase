@@ -1,9 +1,9 @@
-# Daniilbase
+# Jasonbase
 
-Daniilbase is an easy to use extremely customizable json based db.
+Jasonbase is an easy to use an extremely customizable json based ddatabase.
 It allows for complex and powerful queries with a collection of helpers and packages to make rules and authentication.
 
--- It isn't finished please don't use for production --
+Important Note: This is not yet finished, and should not be used in production.
 
 ### Roadmap
 
@@ -15,10 +15,10 @@ It allows for complex and powerful queries with a collection of helpers and pack
 
 ## Structure 
 
-This github contains 3 directories :
+This repo contains 3 directories:
 
 -> client-test:
-Contains a bunch of snippets and an example to kickstart you experience
+Contains an assortment of snippets and an example to kickstart your experience
 
 -> package :
 The client side package to access your jdb
@@ -28,15 +28,15 @@ Where your db resides and the data is stored
     -> root :
         -> index.js : the server
         -> modules :
-            Where are stored the modules necessary to make jason base live
+            Where the neccessary modules are stored, helping make Jasonbase live
         -> api :
-            Where all of the features for the api are stored
+            Where all of the features for the API are stored
             -> auth :
                 Authentication keys
             -> extensions :
-                extensions / modules to help you use jdb
+                Extensions/modules to help you use jdb
         -> db :
-            the place where all the data is stored
+            Where all data is stored
 
 
 ## Client usage 
@@ -92,7 +92,7 @@ db.collection("population").query({
 })
 ```
 
-This one is a bit complicated, you put a collection then your query and then you get it.
+This one is a bit complicated, you put a collection, then your query, and then you get it.
 
 the syntax : 
 
@@ -124,9 +124,9 @@ db.path.getRealTime
 
 ## Server
 
-Daniilbase is made to be extremely modular and secure.
+Jasonbase is made to be extremely modular and secure.
 
-You can make hook / privileges to restrian the access to you db and even make custom routes.
+You can make hooks/privileges to restrian the access to your db and make custom routes.
 
 Example : 
 ```js
@@ -160,10 +160,9 @@ jason.addCustomHook("/population",(req)=>{
 })
 ```
 
-By default, if you do not set a hook for a path Daniilbase will reject the request.
+By default, if you do not set a hook for a path, Jasonbase will reject the request.
 
-To add privileges you can just go into server > api > auth > your-key.json
-and then 
+To add privileges, go into server > api > auth > your-key.json, and then 
 
 ```json
 {
