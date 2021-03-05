@@ -1,12 +1,13 @@
-const { cwd } = require("process");
-const { DBrequest } = require("./request");
-const fs = require("fs");
-const pth = require("path");
-const { isKeyValid } = require("./auth");
-const shared = require("./shared")
+import {cwd} from 'process';
+import {DBrequest} from './request';
+import * as fs from "fs";
+import * as pth from "path";
+import {isKeyValid} from './auth';
+import * as shared from './shared';
 
-var hooks = {};
-var filters = {};
+
+let hooks = {};
+let filters = {};
 
 
 function callCustomHook({ path, req, notExists }) {

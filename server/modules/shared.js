@@ -1,8 +1,8 @@
 const { DBrequest } = require("./request");
 
-var hooks = {};
-var filters = {};
-var methods = {};
+let hooks = {};
+let filters = {};
+let methods = {};
 
 module.exports = {
   hooks,

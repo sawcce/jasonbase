@@ -1,11 +1,11 @@
-const { cwd } = require("fs-jetpack");
-const jetpack = require("fs-jetpack");
-const jason_module = require("./jason-server");
-const auth_module = require("./auth");
-const db_module = require("./db");
-const query_module = require("./query");
+import {cwd} from 'process';
+import * as jetpack from 'fs-jetpack';
+import * as jason_module from './jason-server';
+import * as auth_module from './auth';
+import * as db_module from './db';
+import * as query_module from  './query';
 
-var colors = {
+const colors = {
   Reset: "\x1b[0m",
   Bright: "\x1b[1m",
   Dim: "\x1b[2m",
@@ -37,19 +37,19 @@ const extensions_folder = cwd() + "/api/extensions/";
 
 module.exports = {
   loadModules() {
-    var folders = jetpack.list(extensions_folder);
+    let folders = jetpack.list(extensions_folder);
     folders.forEach((extensionName) => {
       let rootPath = extensions_folder + extensionName;
-      var configPath = `${rootPath}/extension.json`;
-      var configExists = jetpack.exists(configPath);
+      let configPath = `${rootPath}/extension.json`;
+      let configExists = jetpack.exists(configPath);
 
       if (configExists) {
-        var config = JSON.parse(jetpack.read(configPath));
-        var moduleName = config.name;
-        var entryPoint = config.entry;
-        var entryPath = `${rootPath}/${entryPoint}`;
-        var module = require(entryPath);
-        var params = {
+        let config = JSON.parse(jetpack.read(configPath));
+        let moduleName = config.name;
+        let entryPoint = config.entry;
+        let entryPath = `${rootPath}/${entryPoint}`;
+        let module = require(entryPath);
+        let params = {
           jason: jason_module,
           color: colors,
           auth: auth_module,
