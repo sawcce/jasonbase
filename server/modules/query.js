@@ -24,18 +24,18 @@ module.exports = {
 
   async executeTest({ query, data }) {
     return new Promise((resolve, reject) => {
-      var call = Object.keys(query)[0];
-      var params = Object.entries(query)[0][1];
+      let call = Object.keys(query)[0];
+      let params = Object.entries(query)[0][1];
 
-      var operator = Object.keys(params)[0];
-      var operatorVal = Object.values(params)[0];
+      let operator = Object.keys(params)[0];
+      let operatorVal = Object.values(params)[0];
 
       switch (call) {
         case "matches":
-          var values = params.values;
+          let values = params.values;
           if(params.type == "large"){
             for(let i=0;i<values.length;i++){
-              var doesMatch = this.executeOperator({
+              let doesMatch = this.executeOperator({
                 operator:"equalsLarge",
                 operatorVal:params.data[i],
                 data:data,
@@ -61,7 +61,7 @@ module.exports = {
           resolve(false)
           break;
         default:
-          var isTrue = this.executeOperator({
+          let isTrue = this.executeOperator({
             operator: operator,
             params: params,
             value: call,
@@ -76,8 +76,8 @@ module.exports = {
 
   async executeRootTest({ query, data }) {
     return new Promise((resolve, reject) => {
-      var call = Object.keys(query)[0];
-      var params = Object.entries(query)[0][1];
+      let call = Object.keys(query)[0];
+      let params = Object.entries(query)[0][1];
 
       switch (call) {
         case "where":
@@ -96,8 +96,8 @@ module.exports = {
   async executeQuery({ query, path = "", data }) {
     return new Promise((resolve, reject) => {
       let fetchedData = [];
-      var call = Object.keys(query)[0];
-      var params = Object.values(query)[0];
+      let call = Object.keys(query)[0];
+      let params = Object.values(query)[0];
 
       switch (call) {
         case "sort":

@@ -3,8 +3,8 @@ const dbPath = jetpack.cwd() + "/db";
 
 module.exports = {
   fileExists({ path, exists, notExists }) {
-    var filePath = dbPath + path;
-    var doesExists = jetpack.exists(filePath);
+    let filePath = dbPath + path;
+    let doesExists = jetpack.exists(filePath);
     if (doesExists) {
       exists();
     } else {
@@ -22,7 +22,7 @@ module.exports = {
   },
   write(path, data) {
     return new Promise((resolve, reject) => {
-      var filePath = dbPath + path;
+      let filePath = dbPath + path;
       jetpack
         .writeAsync(filePath, data)
         .then(() => {
@@ -35,9 +35,9 @@ module.exports = {
   },
   create(path, data) {
     return new Promise((resolve,reject)=>{
-      var dirPath = dbPath + path;
-      var filesList = jetpack.list(dirPath);
-      var p =`${dirPath}/${filesList.length}.json`;
+      let dirPath = dbPath + path;
+      let filesList = jetpack.list(dirPath);
+      let p =`${dirPath}/${filesList.length}.json`;
       jetpack.write(p, data);
       resolve({docID:filesList.length})
     })
